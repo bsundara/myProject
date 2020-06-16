@@ -1,0 +1,220 @@
+-- drop table studentcourse  ;
+-- drop table course ;
+-- drop table student ;
+
+-- **************
+-- Question Q1 - Create Student, Course and StudentCourse along with respective Primary and Foreign Keys. 
+--               Insert the provided data for each table
+-- **************
+
+-- create table student with primary key as sid
+create table Student (
+ sid number(10) not null, 
+ sname varchar2(15) not null,
+ sage number(3) not null,
+ sbranch char(5) not null,
+ constraint pk_sid primary key (sid)
+) ;
+
+-- create table course with primary key as cid 
+create table Course (
+ cid number(3) not null,
+ cname char(7) not null,
+ units number(3) not null,
+ constraint pk_cid primary key (cid),
+ constraint uk_cname unique(cname)
+) ;
+
+-- create table studentcourse with primary key as (stid,cno)
+-- and also create foreign key relationship for student id in student table and course no in Course table
+create table StudentCourse (
+ stid number(10) not null,
+ cno number(3) not null,
+ grade char(1) not null,
+ constraint pk_stid_cno primary key (stid,cno),
+ constraint fk_stid foreign key (stid) references Student(sid),
+ constraint fk_cno foreign key (cno) references Course(cid)
+) ;
+
+-- delete from student ;
+-- insert into student
+insert into Student (sid, sname, sage, sbranch) values (1001, 'Kamal', 18, 'MECH') ;
+insert into Student (sid, sname, sage, sbranch) values (1003, 'Yogesh', 19, 'MECH') ;
+insert into Student (sid, sname, sage, sbranch) values (1006, 'Mani', 22, 'CSE') ;
+insert into Student (sid, sname, sage, sbranch) values (1021, 'Farooq', 21, 'EEE') ;
+insert into Student (sid, sname, sage, sbranch) values (1025, 'Girija', 19, 'MECH') ;
+insert into Student (sid, sname, sage, sbranch) values (1032, 'Mousmi', 22, 'CSE') ;
+insert into Student (sid, sname, sage, sbranch) values (1038, 'Rajanish', 21, 'MECH') ;
+insert into Student (sid, sname, sage, sbranch) values (1056, 'Praneet', 23, 'EEE') ;
+insert into Student (sid, sname, sage, sbranch) values (1059, 'Joseph', 19, 'CSE') ;
+insert into Student (sid, sname, sage, sbranch) values (1063, 'Lahiri', 20, 'MECH') ;
+commit ;
+
+select * from Student ;
+
+--delete from course ;
+-- insert into counse
+insert into Course (cid, cname, units) values (10, 'CLOUD', 3) ; 
+insert into Course (cid, cname, units) values (20, 'CRYPT', 4) ; 
+insert into Course (cid, cname, units) values (50, 'ARCHI', 5) ; 
+insert into Course (cid, cname, units) values (80, 'MATHS', 3) ; 
+insert into Course (cid, cname, units) values (90, 'CHEM', 3) ; 
+commit ;
+
+select * from Course ;
+
+-- delete from StudentCourse ;
+-- insert into StudentCourse ;
+
+insert into StudentCourse (stid, cno, grade) values (1001, 10, 'A') ;
+insert into StudentCourse (stid, cno, grade) values (1001, 50, 'A') ;
+insert into StudentCourse (stid, cno, grade) values (1006, 10, 'A') ;
+insert into StudentCourse (stid, cno, grade) values (1006, 20, 'B') ;
+insert into StudentCourse (stid, cno, grade) values (1006, 80, 'A') ;
+insert into StudentCourse (stid, cno, grade) values (1006, 90, 'D') ;
+insert into StudentCourse (stid, cno, grade) values (1025, 50, 'A') ;
+insert into StudentCourse (stid, cno, grade) values (1025, 80, 'D') ;
+insert into StudentCourse (stid, cno, grade) values (1025, 90, 'B') ;
+insert into StudentCourse (stid, cno, grade) values (1056, 10, 'B') ;
+insert into StudentCourse (stid, cno, grade) values (1056, 80, 'A') ;
+insert into StudentCourse (stid, cno, grade) values (1056, 90, 'D') ;
+insert into StudentCourse (stid, cno, grade) values (1063, 90, 'B') ;
+insert into StudentCourse (stid, cno, grade) values (1063, 50, 'A') ;
+commit ;
+
+Select * from StudentCourse ;
+
+-- ****************
+-- Question Q2 -  Get the courseID and course name, for those courses having at least 4 students registered in it 
+-- ****************
+
+/* Query to view/understand data for Question Q2 
+select a.cid "Course ID", a.cname "Course Name", b.sid, b.sname --, count(stid) --, c.stid, b.sname, c.cno
+from course a,  student b, studentcourse c
+where c.stid = b.sid
+and c.cno = a.cid 
+order by a.cid ;
+*/
+
+-- Answer:
+
+select b.cid "Course ID", b.cname "Course Name" --, count(a.stid)
+from studentcourse a,  course b
+where a.cno = b.cid 
+group by b.cid, b.cname
+having count(a.stid) >=4 ;
+
+-- ****************
+-- Question Q3: Get student sid and name fro those registered in all 3 credit courses
+-- ****************
+
+/* Query to view/understand data for Q3
+select c.sid "Student SID", c.sname "Student Name", cname, units
+from studentcourse a, course b, student c
+where a.stid = c.sid
+and a.cno = b.cid
+and b.units = 3  
+order by 1 ;
+*/
+
+-- Answer-1:
+-- =========
+select distinct c.sid "Student SID", c.sname "Student Name"
+from studentcourse a, course b, student c
+where a.stid = c.sid
+and a.cno = b.cid
+and b.units = 3  
+order by 1 ;
+
+-- Answer-2:
+-- =========
+
+select c.sid "Student SID", c.sname "Student Name"
+from studentcourse a, course b, student c
+where a.stid = c.sid
+and a.cno = b.cid
+and b.units = 3  
+group by c.sid, c.sname 
+having count(c.sid) > 0 ;
+
+-- ****************
+-- Question Q4 - For each course get cid, cname and number of students registered
+-- ****************
+
+-- Answer:
+
+select a.cid, a.cname, count(b.stid)
+from course a, studentcourse b
+where a.cid = b.cno
+group by a.cid, a.cname ;
+
+-- ****************
+-- Question Q5 - For each of the CSE students give sid, sname, cid and course name they have registered in
+-- ****************
+
+select a.sid "Student SID", a.sname "Student Name", c.cid "Course ID", c.cname "Course Name"
+from student a, studentcourse b, course c
+where a.sbranch = 'CSE'  
+and b.stid = a.sid
+and c.cid = b.cno
+order by a.sid, c.cid  ;
+
+-- ****************
+-- Question Q6 -- Get student sid and name for those not registered in any of the 3 credit courses 
+-- ****************
+
+select a.sid "Student SID", a.sname "Student Name"
+from student a
+minus
+select a.sid "Student SID", a.sname "Student Name" -- , b.cid "Course ID", b.cname "Course Name", b.units
+from student a, course  b, studentcourse c
+where c.stid = a.sid
+and c.cno = b.cid 
+and b.units = 3 ;
+
+-- ****************
+-- Write a PL/SQL stored procedure that takes cid as the input parameter and prints the name and credits for that course as-
+-- "Course with id ____ has Title _______________________ and has ___ credits
+-- ****************
+
+create or replace procedure print_course_details (p_cid in number) is
+  v_cname char(7) := null ;
+  v_units number(3) := 0 ;
+  v_cid_null_excp exception ;
+begin
+  if p_cid is null then
+    raise v_cid_null_excp ;
+  end if ;
+  select cname, units 
+  into v_cname, v_units
+  from course
+  where cid = p_cid ;
+  dbms_output.put_line ('Course with id ' || p_cid || ' has Title ' || trim(v_cname) || ' and has ' || v_units || ' credits' ) ;
+exception
+  when v_cid_null_excp then
+    raise_application_error (-20001, 'Value missing for input Course ID. Please provide value for Course ID') ;
+  when no_data_found then
+    raise_application_error (-20001, 'There are no details for the input course id - ' || p_cid) ;
+  when others then
+    raise ;
+end ;
+/
+
+-- *******
+-- Test the above procedure
+-- *******
+
+set serveroutput on -- needed by dbms_output to write the course details
+set  feedback off   -- switch off the SQL*Plus execution feedback for a given SQL
+
+-- Test with input as null for Course ID 
+ execute print_course_details(null) ;
+ 
+-- Test with Character input value instead of numeric value for Course ID
+ execute  print_course_details('XX') ;
+
+-- Test with a non-existent numeric Course id
+ execute  print_course_details(1000) ;
+
+-- Test with a valid Course id
+execute  print_course_details(50) ;
