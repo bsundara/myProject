@@ -154,10 +154,9 @@ group by a.cid, a.cname ;
 
 select a.sid "Student SID", a.sname "Student Name", c.cid "Course ID", c.cname "Course Name"
 from student a, studentcourse b, course c
-where a.sbranch = 'CSE'  
-and b.stid = a.sid
-and c.cid = b.cno
-order by a.sid, c.cid  ;
+where c.cid (+) = b.cno
+and a.sbranch = 'CSE' 
+and a.sid = b.stid (+) ;
 
 -- ****************
 -- Question Q6 -- Get student sid and name for those not registered in any of the 3 credit courses 
